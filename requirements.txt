@@ -1,0 +1,31 @@
+# AI201 — pinned with BOTH lower and upper bounds, on purpose.
+#
+#
+# Supported Python: 3.11, 3.12, or 3.13. NOT 3.14 — it ships as the default on
+# recent macOS versions and several of these packages don't support it yet.
+
+# Loads your API key out of .env
+python-dotenv>=1.0,<1.2
+
+# Turns text into vectors. Runs on your machine, costs no API quota.
+sentence-transformers>=3.4,<3.5
+
+# Stores those vectors and searches them. Runs on your machine.
+chromadb>=0.6,<0.7
+
+# Not used directly. This is chromadb's telemetry dependency, and chromadb
+# declares it as `posthog>=2.4.0` with NO upper bound. posthog 7.x changed a
+# function signature that chromadb still calls the old way, so with a current
+# posthog every Chroma call prints "Failed to send telemetry event ...".
+# It looks exactly like a real error and isn't one. Pinned here because
+# chromadb didn't pin it — this is the same class of bug as the unpinned
+# Gradio that crashed a live class last year.
+posthog>=3.0,<4.0
+
+# Calls the hosted model that writes answers. The only paid dependency,
+# and it's free at the tier this course uses.
+google-genai>=1.0,<2.0
+
+# Keyword search, for one of week 2's improvement options. Shipped pinned so
+# it's there if you want it — the implementation is yours to write.
+rank-bm25>=0.2.2,<0.3

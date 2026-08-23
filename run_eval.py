@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""
+Run your test questions repeatedly and write the results down.
+
+    python run_eval.py                 three runs, the default
+    python run_eval.py --runs 5        more runs
+    python run_eval.py --label after   name this run, e.g. before/after a fix
+
+This does the mechanical half of week 2 for you: it asks each of your questions
+the same way three separate times, with caching turned off so you get three
+real answers, and writes everything into results/ in the table format the
+submission asks for.
+
+⚠️ What it does NOT do is decide whether an answer was right.
+
+That judgment is yours, and you'll build it in class in week 2 as `scorer.py`.
+Until that file exists, the Verdict column comes out blank and you fill it in
+by reading the output. Once it exists — with a function
+`judge(question, expects, answer, results) -> bool` — this script will call it
+and fill the column in for you.
+
+Deciding what counts as correct is the actual lesson. It would be easy to hand
+you a scorer; you'd learn nothing from it.
+"""
+
+import argparse
+import datetime as dt
+import sys
+from pathlib import Path
+
+import config
+import questions as qs
+
+
+def load_scorer():
+    """Use scorer.py if the student has built it. Otherwise run unscored."""
+    try:
+        import scorer  # noqa: PLC0415
+    except ImportError:
+        return None
+    judge = getattr(scorer, "judge", None)
+    return judge if callable(judge) else None
+
+
+def run_once(question: str, top_k, threshold, corpus, variant):
+    """One question, one run. Returns the answer and what retrieval gave us."""
+    from store import search
+    import gate
+    from generate import answer_from_chunks
+
+    results = search(question, top_k=top_k, corpus=corpus, variant=variant)
+    decision = gate.check(results, threshold=threshold)
+
+    if not decision.passed:
+        return gate.REFUSAL, results, decision
+
+    # cache=False on purpose. Three runs have to be three real answers.
+    answer = answer_from_chunks(question, results, cache=False)
+    return answer, results, decision
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run the test questions and log the results.")
+    parser.add_argument("--runs", type=int, default=3, help="runs per question (default 3)")
+    parser.add_argument("--label", default="", help="a name for this run, e.g. 'before'")
+    parser.add_argument("--corpus", default=None)
+    parser.add_argument("--variant", default="default")
+    parser.add_argument("--top-k", type=int, default=None)
+    parser.add_argument("--threshold", type=float, default=None)
+    args = parser.parse_args()
+
+    corpus = args.corpus or config.CORPUS
+    top_k = args.top_k or config.TOP_K
+    threshold = config.THRESHOLD if args.threshold is None else args.threshold
+
+    items = qs.answered()
+    if not items:
+        print(
+            "questions.py has no questions in it yet.\n"
+            "Milestone 2 asks you to write five. Fill them in and run this again.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    judge = load_scorer()
+    if judge is None:
+        print("No scorer.py found — running unscored. Verdict column will be blank.")
+        print("You'll build scorer.py in class in week 2.\n")
+
+    if args.runs < 3:
+        print(f"⚠️  {args.runs} run(s). The submission asks for three.\n")
+
+    transcript = []
+    rows = []
+
+    for item in items:
+        question = item["question"]
+        expects = item.get("expects", "")
+        print(f"\n{question}")
+
+        run_results = []
+        for run in range(1, args.runs + 1):
+            answer, results, decision = run_once(
+                question, top_k, threshold, corpus, args.variant
+            )
+            passed = judge(question, expects, answer, results) if judge else None
+            run_results.append(passed)
+
+            mark = {True: "pass", False: "fail", None: "—"}[passed]
+            print(f"  run {run}: {mark}  (best distance {decision.best_distance:.3f})")
+
+            transcript.append(
+                {
+                    "question": question,
+                    "run": run,
+                    "answer": answer,
+                    "sources": sorted({r.source for r in results}),
+                    "best_distance": decision.best_distance,
+                    "gate_passed": decision.passed,
+                }
+            )
+
+        rows.append({"question": question, "expects": expects, "runs": run_results})
+
+    write_report(rows, transcript, args, corpus, top_k, threshold, scored=judge is not None)
+
+
+def write_report(rows, transcript, args, corpus, top_k, threshold, scored):
+    config.RESULTS_DIR.mkdir(exist_ok=True)
+    stamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M")
+    label = f"_{args.label}" if args.label else ""
+    path = config.RESULTS_DIR / f"run_{stamp}{label}.md"
+
+    n = len(rows[0]["runs"]) if rows else 0
+    run_headers = " | ".join(f"Run {i}" for i in range(1, n + 1))
+    run_divider = "|".join(["---"] * n)
+
+    lines = [
+        f"# Run log{f' — {args.label}' if args.label else ''}",
+        "",
+        f"- Produced by: `run_eval.py::main`",
+        f"- Retrieval: `store.py::search`, chunks from `chunker.py::split_documents`",
+        f"- Corpus: `{corpus}` (index variant `{args.variant}`)",
+        f"- top-k: {top_k} · relevance cutoff: {threshold}",
+        f"- Runs per question: {n}, caching off",
+        f"- When: {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        "",
+        "This table is one row per QUESTION. The run log your README asks for is",
+        "one row per CRITERION, so aggregate these into it — criterion 1 is how many",
+        "of your questions had the answer in the retrieved chunks, and so on.",
+        "",
+        f"| Question | {run_headers} |",
+        f"|---|{run_divider}|",
+    ]
+
+    for row in rows:
+        cells = []
+        for passed in row["runs"]:
+            cells.append({True: "pass", False: "fail", None: " "}[passed])
+        question = row["question"].replace("|", "\\|")
+        lines.append(f"| {question} | {' | '.join(cells)} |")
+
+    if not scored:
+        lines += [
+            "",
+            "> The Run columns are blank because `scorer.py` doesn't exist yet.",
+            "> Judge each question yourself by reading the output below, or build",
+            "> the scorer first and re-run.",
+        ]
+
+    lines += ["", "---", "", "## Real output", "",
+              "This is what the system actually produced. Paste the relevant parts",
+              "into your README underneath the table — the rubric asks for real",
+              "output as text, not a description of it.", ""]
+
+    for entry in transcript:
+        lines += [
+            f"### {entry['question']} — run {entry['run']}",
+            "",
+            f"- Best distance: {entry['best_distance']:.4f} "
+            f"({'passed' if entry['gate_passed'] else 'refused by'} the gate)",
+            f"- Sources retrieved: {', '.join(entry['sources']) or 'none'}",
+            "",
+            "```",
+            entry["answer"],
+            "```",
+            "",
+        ]
+
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+    import generate as gen
+
+    print(f"\nWrote {path.relative_to(config.ROOT)}")
+    print(gen.usage())
+    print("\nCommit this file. It's the evidence the run actually happened.")
+
+
+if __name__ == "__main__":
+    main()
