@@ -33,8 +33,13 @@ python test.py
 ```
 
 **You're ready when `python test.py` passes.** The first run is slow — it
-downloads the embedding model, about 90 MB. That's exactly why this happens
+downloads the embedding model, about 80 MB. That's exactly why this happens
 before class rather than during it.
+
+The model comes down from Chroma's own servers, not from Hugging Face, and
+embedding runs entirely on your machine. If your network blocks one of those
+and not the other, this is the one that has to get through:
+`chroma-onnx-models.s3.amazonaws.com`.
 
 If it doesn't pass and you've made one honest attempt at the error, post the
 **whole** output in the help channel. Setup problems are normal and nobody has
@@ -123,6 +128,7 @@ across.
 | `gate.py` | The relevance gate. Refuses questions nothing came back close enough for |
 | `generate.py` | Writes the answer — **stage 5**. The only thing that calls out to a service |
 | `app.py` | The command line |
+| `serve.py` | The same pipeline behind HTTP, for when it has to run as a service — **week 9** |
 | `run_eval.py` | Runs your questions repeatedly and writes the run log |
 | `questions.py` | Your five test questions. **You fill this in** |
 | `criteria.md` | Your five acceptance criteria. **You fill this in** |
@@ -150,7 +156,9 @@ this for you:
   silently draining your whole day's allowance. If you hit that, you almost
   certainly have a loop running away — look for it before raising the limit in
   `config.py`.
-- **It prints how many calls you've used** when you exit.
+- **It prints how many calls and tokens you've used** when you exit. The
+  token counts come off the responses themselves, so they're a measurement of
+  what a run cost rather than an estimate.
 
 If you see a `429` or "resource exhausted" error, that's a rate limit and not a
 broken key. Wait a minute and re-run.
@@ -176,6 +184,36 @@ own machine alone.
 
 ---
 
+## Running it somewhere else — **week 9**
+
+Week 1 doesn't need this. It's here because the file it describes ships in the
+starter, and finding out in week 9 that it exists is worse than reading one
+table now.
+
+`serve.py` puts the same pipeline behind HTTP, so it can run as a service that
+stays up instead of a command that exits.
+
+```bash
+python serve.py                    # locally, on port 5000
+gunicorn serve:app                 # the way a host starts it
+```
+
+| Thing | What it does |
+|---|---|
+| `POST /ask` | Send `{"question": "..."}`, get the answer and its sources back as JSON |
+| `GET /health` | Says whether the service is up and whether an index exists to search |
+| `PORT` | The port to listen on. Hosts set it for you; on your laptop it defaults to 5000 |
+| `AI201_DEBUG=1` | Flask's reloader and debugger. Local only — never set it on a deployed service |
+
+> The free hosting tier sleeps after about fifteen minutes with no traffic, so
+> the first request after a quiet spell waits roughly a minute for it to wake
+> up. That's the tier, not your code.
+
+`serve.py` has **no logging and no timing in it on purpose** — building that is
+the week 9 exercise, and it is easier to instrument something you wrote.
+
+---
+
 ## Stretch features
 
 Optional, for extra credit. **Say what you're adding in your README before you
@@ -186,7 +224,12 @@ start** — a feature the README never claims earns nothing.
   it would go.
 - **Conversational memory** — let the next question build on the last.
 - **A second embedding model** — swap `EMBEDDING_MODEL` in `config.py`, index
-  into a different `--variant`, and write down what moved.
+  into a different `--variant`, and write down what moved. This is the one
+  option that needs a package the default install doesn't have:
+  `pip install 'sentence-transformers>=3.4,<3.5'` first. It's a large install
+  (it brings PyTorch), so do it before class, not during. Expect your
+  threshold to move too — a different model means different distances, and
+  the 0.6 you measured in Milestone 4 was measured against this one.
 
 `rank-bm25` is already installed for week 2's hybrid-search option. The
 dependency ships; the implementation is yours.

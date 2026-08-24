@@ -44,8 +44,11 @@ line. Re-run `python app.py index` after switching.
 
 Not for your project. This is the small corpus your instructor uses for the
 in-class follow-along, kept separate so nothing done in class touches your
-graded work. It's twenty-four short documents about a board game that doesn't
-exist.
+graded work. It's twenty-eight documents about a board game that doesn't
+exist — twenty-four short ones of a paragraph or two, and four longer sectioned
+guides that a fixed-size chunker cuts straight through the middle of.
+
+28 documents · 15,901 characters · about 567 characters per document
 
 ## Bringing your own documents
 
@@ -56,3 +59,9 @@ Two honest warnings. You take on the cleaning work the provided corpora
 already did, and it earns no extra points. And you'll need to check that
 your relevance cutoff still separates in-corpus from out-of-corpus
 questions, since 0.6 was chosen against these three.
+
+That check is Milestone 4, and it is the same check that makes 0.6 a cutoff
+rather than a number. Treat the default as a starting point, not an answer —
+it was set against the corpora above at their shipped chunk settings, and
+changing the chunking moves the distances underneath it. Measuring it
+yourself is the milestone.

@@ -9,10 +9,10 @@ pipeline code.
     python tools/smoke_test.py
 
 It exercises every stage against every shipped corpus, using a stand-in
-embedding model and a stand-in model call so it needs neither a Hugging Face
-download nor an API key. That makes it fast and CI-friendly, and it means the
-distances it sees are meaningless — it proves the plumbing, not the quality.
-Use tools/calibrate.py with the real model for anything about quality.
+embedding model and a stand-in model call so it needs neither a model download
+nor an API key. That makes it fast and CI-friendly, and it means the distances
+it sees are meaningless — it proves the plumbing, not the quality. The staff
+repo's `_staff/calibrate.py` covers quality, with the real model.
 """
 
 import os

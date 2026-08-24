@@ -9,7 +9,8 @@ starter didn't break anything.
 It produces deterministic vectors from word hashes. They are good enough to
 show that data flows correctly through the pipeline. They are NOT good enough
 to say anything about retrieval quality or about where a relevance threshold
-belongs. Use tools/calibrate.py with the real model for that.
+belongs. The staff repo's `_staff/calibrate.py` does that with the real
+model.
 """
 
 import hashlib

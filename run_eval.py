@@ -8,16 +8,20 @@ Run your test questions repeatedly and write the results down.
 
 This does the mechanical half of week 2 for you: it asks each of your questions
 the same way three separate times, with caching turned off so you get three
-real answers, and writes everything into results/ in the table format the
-submission asks for.
+real answers, and writes everything into results/ as a table with one row per
+question.
+
+That table is the raw material for your run log, not the run log itself. The
+submission template wants one row per *criterion* — aggregating your questions
+up into your criteria is your work, not the script's.
 
 ⚠️ What it does NOT do is decide whether an answer was right.
 
 That judgment is yours, and you'll build it in class in week 2 as `scorer.py`.
-Until that file exists, the Verdict column comes out blank and you fill it in
-by reading the output. Once it exists — with a function
-`judge(question, expects, answer, results) -> bool` — this script will call it
-and fill the column in for you.
+Until that file exists, the Run columns carry the raw answers and you read them
+yourself. Once it exists — a file called `scorer.py`, with a function
+`judge(question, expects, answer, results) -> bool` — this script finds it
+automatically and the Run columns carry verdicts instead.
 
 Deciding what counts as correct is the actual lesson. It would be easy to hand
 you a scorer; you'd learn nothing from it.

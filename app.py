@@ -54,6 +54,50 @@ def cmd_index(args):
     print(f"\nReady. Try: python app.py ask \"your question here\"")
 
 
+def _chunks_from_doc(chunks, wanted):
+    """Every chunk that came out of one source document, in order.
+
+    This is the sample to use when you re-chunk and want to compare. The
+    default sample is taken by stride across the whole corpus, so as soon as a
+    new chunker changes the chunk count it lands on different documents and
+    there is nothing to compare. One named document's chunks are the same
+    material before and after, however many pieces it was cut into.
+    """
+    matches = [c for c in chunks if c.source == wanted]
+    if not matches:
+        matches = [c for c in chunks if wanted.lower() in c.source.lower()]
+    if not matches:
+        sources = sorted({c.source for c in chunks})
+        raise SystemExit(
+            f"No document matching '{wanted}'. This corpus has:\n  "
+            + "\n  ".join(sources)
+        )
+    found = sorted({c.source for c in matches})
+    if len(found) > 1:
+        raise SystemExit(
+            f"'{wanted}' matches more than one document:\n  "
+            + "\n  ".join(found)
+            + "\nBe more specific."
+        )
+    return sorted(matches, key=lambda c: c.index)
+
+
+def _chunks_at(chunks, spec):
+    """Chunks at the exact positions given, e.g. --indices 0,4,8,12,16."""
+    try:
+        positions = [int(piece) for piece in spec.split(",") if piece.strip()]
+    except ValueError:
+        raise SystemExit(f"--indices wants whole numbers separated by commas, not '{spec}'")
+
+    picked = []
+    for position in positions:
+        if 0 <= position < len(chunks):
+            picked.append(chunks[position])
+        else:
+            print(f"(no chunk at position {position} — this corpus has {len(chunks)})")
+    return picked
+
+
 def cmd_chunks(args):
     """Milestone 3. Print chunks so you can read them and paste them."""
     from ingest import load_documents
@@ -61,17 +105,37 @@ def cmd_chunks(args):
 
     chunks = split_documents(load_documents(args.corpus or config.CORPUS))
 
-    step = max(len(chunks) // args.n, 1)
-    sample = chunks[::step][: args.n]
+    if args.from_doc:
+        sample = _chunks_from_doc(chunks, args.from_doc)
+        heading = (
+            f"{len(chunks)} chunks total. Showing all {len(sample)} from "
+            f"{sample[0].source}."
+        )
+    elif args.indices:
+        sample = _chunks_at(chunks, args.indices)
+        heading = (
+            f"{len(chunks)} chunks total. Showing {len(sample)} at positions "
+            f"{args.indices}."
+        )
+    else:
+        step = max(len(chunks) // args.n, 1)
+        sample = chunks[::step][: args.n]
+        heading = (
+            f"{len(chunks)} chunks total. Showing {len(sample)}, spread across "
+            f"the corpus."
+        )
 
-    print(f"{len(chunks)} chunks total. Showing {len(sample)}, spread across the corpus.\n")
+    print(f"{heading}\n")
     print("Paste these into your README under Sample Chunks. The rubric asks")
     print("for the source file and the function that produced them — both are")
     print("printed for you below.\n")
 
     for i, chunk in enumerate(sample, 1):
         print("=" * 70)
-        print(f"Chunk {i}  |  source: {chunk.source}  |  produced by: {chunk.produced_by}")
+        print(
+            f"Chunk {i}  |  source: {chunk.source}#{chunk.index}  "
+            f"|  produced by: {chunk.produced_by}"
+        )
         print("=" * 70)
         print(chunk.text)
         print()
@@ -111,27 +175,111 @@ def cmd_retrieve(args):
     print("two groups. Your cutoff goes in that gap.")
 
 
-def _ask_one(question, corpus, variant, top_k, threshold, show_distances=True):
+def ask_pipeline(
+    question,
+    corpus=None,
+    variant="default",
+    top_k=None,
+    threshold=None,
+    on_gate=None,
+    on_prompt=None,
+):
+    """Retrieve, gate, answer. Returns the outcome and prints nothing.
+
+    One question through all five stages, with the result handed back as a
+    plain dict instead of printed. `_ask_one` below prints it for the command
+    line; `serve.py` turns the same dict into JSON. The relevance gate is the
+    reason this is one function rather than two: a web wrapper that re-decided
+    when to refuse would be a second cutoff you'd have to keep in step with
+    this one, and it would drift.
+
+    The two optional callbacks let the command line print as it goes without
+    this function knowing anything about printing: `on_gate` is handed the gate
+    decision as soon as it's made, and `on_prompt` is handed the assembled
+    prompt just before it goes out — that's how `--show-prompt` shows you the
+    prompt while the model is still thinking rather than after.
+    """
     from store import search
     import gate
-    from generate import answer_from_chunks
+    from generate import answer_from_chunks, build_prompt
 
-    results = search(question, top_k=top_k, corpus=corpus, variant=variant)
+    results = search(
+        question,
+        top_k=top_k or config.TOP_K,
+        corpus=corpus or config.CORPUS,
+        variant=variant,
+    )
     decision = gate.check(results, threshold=threshold)
+    if on_gate is not None:
+        on_gate(decision)
 
-    if show_distances:
+    outcome = {
+        "question": question,
+        "refused": not decision.passed,
+        "best_distance": decision.best_distance,
+        "threshold": decision.threshold,
+        "sources": [],
+        "prompt": None,
+    }
+
+    if not decision.passed:
+        outcome["answer"] = gate.REFUSAL
+        return outcome
+
+    prompt = build_prompt(question, results)
+    if on_prompt is not None:
+        on_prompt(prompt)
+
+    outcome["prompt"] = prompt
+    outcome["answer"] = answer_from_chunks(question, results)
+    outcome["sources"] = sorted({r.source for r in results})
+    return outcome
+
+
+def _ask_one(
+    question,
+    corpus,
+    variant,
+    top_k,
+    threshold,
+    show_distances=True,
+    show_prompt=False,
+):
+    import gate
+    from generate import GROUNDING_INSTRUCTION
+
+    def print_distances(decision):
         best = f"{decision.best_distance:.3f}"
         print(f"  (best distance {best}, cutoff {decision.threshold})")
 
-    if not decision.passed:
+    def print_prompt(prompt):
+        print("\n" + "=" * 70)
+        print("System instruction sent with the prompt")
+        print("=" * 70)
+        print(GROUNDING_INSTRUCTION)
+        print("\n" + "=" * 70)
+        print("The assembled prompt, exactly as sent")
+        print("=" * 70)
+        print(prompt)
+        print("=" * 70)
+
+    outcome = ask_pipeline(
+        question,
+        corpus=corpus,
+        variant=variant,
+        top_k=top_k,
+        threshold=threshold,
+        on_gate=print_distances if show_distances else None,
+        on_prompt=print_prompt if show_prompt else None,
+    )
+
+    if outcome["refused"]:
         print(f"\n{gate.REFUSAL}\n")
         return gate.REFUSAL
 
-    answer = answer_from_chunks(question, results)
-    sources = sorted({r.source for r in results})
-    print(f"\n{answer}\n")
-    print(f"Sources retrieved: {', '.join(sources)}\n")
-    return answer
+    print(f"\n{outcome['answer']}\n")
+    print(f"Sources retrieved: {', '.join(outcome['sources'])}\n")
+    return outcome["answer"]
 
 
 def cmd_ask(args):
@@ -140,7 +288,14 @@ def cmd_ask(args):
 
     try:
         if args.question:
-            _ask_one(args.question, corpus, args.variant, args.top_k, args.threshold)
+            _ask_one(
+                args.question,
+                corpus,
+                args.variant,
+                args.top_k,
+                args.threshold,
+                show_prompt=args.show_prompt,
+            )
         else:
             print("Ask a question, or press Enter on an empty line to quit.\n")
             while True:
@@ -151,7 +306,14 @@ def cmd_ask(args):
                     break
                 if not question:
                     break
-                _ask_one(question, corpus, args.variant, args.top_k, args.threshold)
+                _ask_one(
+                    question,
+                    corpus,
+                    args.variant,
+                    args.top_k,
+                    args.threshold,
+                    show_prompt=args.show_prompt,
+                )
     finally:
         print(gen.usage())
 
@@ -179,6 +341,20 @@ def build_parser():
 
     p_chunks = sub.add_parser("chunks", help="print sample chunks (Milestone 3)")
     p_chunks.add_argument("-n", type=int, default=5, help="how many to print")
+    p_chunks.add_argument(
+        "--from-doc",
+        metavar="NAME",
+        help=(
+            "print every chunk of one source document instead of a sample. "
+            "Use this to compare the same material before and after a "
+            "chunker change"
+        ),
+    )
+    p_chunks.add_argument(
+        "--indices",
+        metavar="0,4,8",
+        help="print the chunks at these exact positions instead of a sample",
+    )
     p_chunks.set_defaults(func=cmd_chunks)
 
     p_ret = sub.add_parser("retrieve", help="show distances only (Milestone 4)")
@@ -190,6 +366,11 @@ def build_parser():
     p_ask.add_argument("question", nargs="?")
     p_ask.add_argument("--top-k", type=int)
     p_ask.add_argument("--threshold", type=float, help="override the gate cutoff")
+    p_ask.add_argument(
+        "--show-prompt",
+        action="store_true",
+        help="print the assembled prompt before the answer",
+    )
     p_ask.set_defaults(func=cmd_ask)
 
     return parser

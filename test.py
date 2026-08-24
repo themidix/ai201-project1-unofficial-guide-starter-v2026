@@ -30,14 +30,16 @@ MODEL = os.getenv("AI201_MODEL", "gemini-3.5-flash-lite")
 
 MIN_PYTHON = (3, 11)
 MAX_PYTHON = (3, 14)  # exclusive — 3.14 breaks the pinned stack
-MIN_DISK_GB = 5
+# Was 5, which was sized for PyTorch. The pinned stack no longer installs it —
+# see the note in requirements.txt — so the whole environment is now roughly
+# 600 MB plus an 80 MB model. 2 GB leaves room for the vector store and slack.
+MIN_DISK_GB = 2
 MIN_RAM_GB = 4
 
 # Distribution name on PyPI -> module name you actually import.
 IMPORT_NAMES = {
     "python-dotenv": "dotenv",
     "google-genai": "google.genai",
-    "sentence-transformers": "sentence_transformers",
     "rank-bm25": "rank_bm25",
     "rank_bm25": "rank_bm25",
     "pillow": "PIL",
@@ -170,7 +172,7 @@ def check_machine():
     if free_gb < MIN_DISK_GB:
         report("FAIL", "Free disk space",
                f"{free_gb:.1f} GB free, need about {MIN_DISK_GB} GB. "
-               f"The embedding model and its cache are most of it.")
+               f"The packages and the embedding model are most of it.")
     else:
         report("PASS", "Free disk space", f"{free_gb:.1f} GB")
 
@@ -223,14 +225,16 @@ def check_key_present(key):
 # --- 5. The slow ones -------------------------------------------------------
 
 def check_embeddings():
+    # The embedding model ships inside chromadb — see the note in
+    # requirements.txt — so there is no separate package to check for here.
     try:
-        from sentence_transformers import SentenceTransformer
+        from chromadb.utils.embedding_functions import ONNXMiniLM_L6_V2
     except ImportError:
-        return report("SKIP", "Embedding model", "sentence-transformers not installed yet.")
-    print("         (first run downloads ~90 MB — this is the slow part)")
+        return report("SKIP", "Embedding model", "chromadb not installed yet.")
+    print("         (first run downloads ~80 MB — this is the slow part)")
     try:
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-        dim = len(model.encode("ready"))
+        model = ONNXMiniLM_L6_V2()
+        dim = len(model(["ready"])[0])
         report("PASS", "Embedding model", f"all-MiniLM-L6-v2 loaded, {dim}-dim vectors")
     except Exception as e:
         report("FAIL", "Embedding model", f"{type(e).__name__}: {e}")

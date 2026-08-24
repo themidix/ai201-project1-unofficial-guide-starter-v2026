@@ -50,6 +50,13 @@ THRESHOLD = 0.6
 # Embeddings run on your own machine and cost no API quota.
 # Only generation calls out to a service.
 
+# This is the model Chroma bundles, and leaving it alone is the fast path: it
+# downloads about 80 MB from Chroma's own CDN and needs nothing else installed.
+#
+# Setting it to any other name — week 2's "try a second embedding model"
+# stretch option — switches to loading that model from Hugging Face instead,
+# which needs `pip install 'sentence-transformers>=3.4,<3.5'` first. store.py
+# says so with a real error message rather than a stack trace if you forget.
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 MODEL = os.getenv("AI201_MODEL", "gemini-3.5-flash-lite")
 
