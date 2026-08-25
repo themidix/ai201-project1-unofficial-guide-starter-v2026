@@ -44,6 +44,11 @@ When I ask a question my documents clearly don't cover, the relevance gate
 stops it and the system returns "I don't have enough information about that" —
 in at least 4 of 5 tries.
 
+<!-- The five questions are the ones in `OUT_OF_SCOPE` at the bottom of
+     `questions.py`, and `run_eval.py` puts them through the gate and writes
+     what happened into your run log. Swap them for your own if you'd rather —
+     just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
+
 **Why this target:**
 <!-- What did your distances look like when you set the cutoff in Milestone 4?
      Was there a clean gap, or did the two groups overlap? -->

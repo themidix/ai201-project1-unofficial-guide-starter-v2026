@@ -22,7 +22,7 @@ line. Re-run `python app.py index` after switching.
 
 *Pick this if* you want the closest thing to the brief's framing, and short documents where a chunk can easily hold a whole thought.
 
-88 documents · 28,095 characters · about 319 characters per document
+88 documents · 27,908 characters · about 317 characters per document
 
 ## `advice_threads`
 
@@ -30,7 +30,7 @@ line. Re-run `python app.py index` after switching.
 
 *Pick this if* you want messier material. Chunking is harder here — a reply boundary and a useful boundary are not the same thing — and that makes for a more interesting Milestone 3.
 
-23 documents · 12,530 characters · about 544 characters per document
+23 documents · 12,490 characters · about 543 characters per document
 
 ## `city_guides`
 
@@ -38,7 +38,7 @@ line. Re-run `python app.py index` after switching.
 
 *Pick this if* you want to think about splitting on structure rather than on length. Fixed-size chunks cut through these headings badly, which is exactly the problem worth solving.
 
-14 documents · 29,014 characters · about 2,072 characters per document
+14 documents · 28,958 characters · about 2,068 characters per document
 
 ## `practice`
 

@@ -85,7 +85,7 @@ switching corpora.**
 | `python app.py ask` | Keeps asking until you press Enter on an empty line |
 | `python app.py chunks` | Prints sample chunks — **Milestone 3** |
 | `python app.py retrieve "question"` | Shows distances without spending a model call — **Milestone 4** |
-| `python run_eval.py --label before` | Runs every test question three times and writes a run log — **week 2** |
+| `python run_eval.py --label before` | Runs every test question three times, puts every `OUT_OF_SCOPE` question through the gate, and writes a run log — **week 2** |
 
 Useful flags:
 
@@ -115,6 +115,14 @@ Useful flags:
 produced it** — both of which your README has to name. Copy them straight
 across.
 
+`run_eval.py` also runs the five questions in `OUT_OF_SCOPE` at the bottom of
+`questions.py` through retrieval and the relevance gate, and puts what happened
+in the run log under its own heading. That's the evidence for criterion 3, and
+it costs you nothing: a question the gate refuses never reaches the model, so
+there is no API call. It runs them once rather than three times, because
+retrieval is deterministic and the gate is a comparison against a fixed
+number — three passes would produce the same three answers.
+
 ---
 
 ## Where everything lives
@@ -130,7 +138,7 @@ across.
 | `app.py` | The command line |
 | `serve.py` | The same pipeline behind HTTP, for when it has to run as a service — **week 9** |
 | `run_eval.py` | Runs your questions repeatedly and writes the run log |
-| `questions.py` | Your five test questions. **You fill this in** |
+| `questions.py` | Your five test questions, and the five out-of-corpus ones the gate should refuse. **You fill in the first five** |
 | `criteria.md` | Your five acceptance criteria. **You fill this in** |
 | `README.md` | Your submission |
 | `corpora/` | The provided documents, and `corpora/README.md` describing each |

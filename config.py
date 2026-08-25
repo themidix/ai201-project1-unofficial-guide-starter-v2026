@@ -64,10 +64,6 @@ MODEL = os.getenv("AI201_MODEL", "gemini-3.5-flash-lite")
 # ─── Rate limiting and quota guards ──────────────────────────────────────────
 # You should not need to touch these. They exist so that a runaway loop costs
 # you a warning instead of your whole day's allowance.
-#
-# ⚠️ STAFF: confirm REQUESTS_PER_MINUTE against the AI Studio rate-limit
-# dashboard for a real student account before the term. Google no longer
-# publishes free-tier limits; this value is an assumption.
 
 REQUESTS_PER_MINUTE = 30       # outgoing calls the limiter will allow per minute
 SESSION_REQUEST_BUDGET = 300   # stop and warn rather than draining the daily quota

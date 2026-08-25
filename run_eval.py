@@ -11,6 +11,11 @@ the same way three separate times, with caching turned off so you get three
 real answers, and writes everything into results/ as a table with one row per
 question.
 
+It also puts every question in `OUT_OF_SCOPE` through retrieval and the gate
+and records what happened, so criterion 3 — the one about out-of-corpus
+questions — has evidence in the same file as the other four. That part costs
+nothing: a question the gate refuses never reaches the model.
+
 That table is the raw material for your run log, not the run log itself. The
 submission template wants one row per *criterion* — aggregating your questions
 up into your criteria is your work, not the script's.
@@ -126,10 +131,52 @@ def main():
 
         rows.append({"question": question, "expects": expects, "runs": run_results})
 
-    write_report(rows, transcript, args, corpus, top_k, threshold, scored=judge is not None)
+    gate_rows = check_out_of_scope(top_k, threshold, corpus, args.variant)
+
+    write_report(
+        rows, transcript, gate_rows, args, corpus, top_k, threshold,
+        scored=judge is not None,
+    )
 
 
-def write_report(rows, transcript, args, corpus, top_k, threshold, scored):
+def check_out_of_scope(top_k, threshold, corpus, variant):
+    """Put every OUT_OF_SCOPE question through retrieval and the gate.
+
+    Criterion 3 in criteria.md is about questions the corpus doesn't cover, and
+    it needs evidence in the run log like the other four. This costs nothing:
+    a question the gate refuses never reaches the model, so there is no API
+    call and no reason to run it three times — retrieval is deterministic and
+    the gate is a comparison against a fixed number.
+    """
+    from store import search
+    import gate
+
+    questions = getattr(qs, "OUT_OF_SCOPE", [])
+    if not questions:
+        return []
+
+    print("\nOut-of-scope questions (the gate should refuse these):")
+    rows = []
+    for question in questions:
+        results = search(question, top_k=top_k, corpus=corpus, variant=variant)
+        decision = gate.check(results, threshold=threshold)
+        refused = not decision.passed
+        print(f"  {'refused' if refused else 'LET THROUGH'}  "
+              f"(best distance {decision.best_distance:.3f})  {question}")
+        rows.append(
+            {
+                "question": question,
+                "refused": refused,
+                "best_distance": decision.best_distance,
+            }
+        )
+
+    kept = sum(r["refused"] for r in rows)
+    print(f"  -> gate refused {kept} of {len(rows)}")
+    return rows
+
+
+def write_report(rows, transcript, gate_rows, args, corpus, top_k, threshold, scored):
     config.RESULTS_DIR.mkdir(exist_ok=True)
     stamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M")
     label = f"_{args.label}" if args.label else ""
@@ -171,6 +218,29 @@ def write_report(rows, transcript, args, corpus, top_k, threshold, scored):
             "> Judge each question yourself by reading the output below, or build",
             "> the scorer first and re-run.",
         ]
+
+    if gate_rows:
+        refused = sum(r["refused"] for r in gate_rows)
+        lines += [
+            "",
+            "---",
+            "",
+            "## The relevance gate on out-of-corpus questions",
+            "",
+            f"Produced by `run_eval.py::check_out_of_scope`, cutoff {threshold}. "
+            f"Refused {refused} of {len(gate_rows)}.",
+            "",
+            "Retrieval is deterministic and the gate is a comparison against a",
+            "fixed number, so these do not vary between runs — one pass over the",
+            "list is the whole measurement.",
+            "",
+            "| Out-of-scope question | Best distance | Gate |",
+            "|---|---|---|",
+        ]
+        for row in gate_rows:
+            question = row["question"].replace("|", "\\|")
+            verdict = "refused" if row["refused"] else "**let through**"
+            lines.append(f"| {question} | {row['best_distance']:.3f} | {verdict} |")
 
     lines += ["", "---", "", "## Real output", "",
               "This is what the system actually produced. Paste the relevant parts",

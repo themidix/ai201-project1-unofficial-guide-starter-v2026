@@ -170,9 +170,9 @@ def cmd_retrieve(args):
     decision = gate.check(results)
     print(f"\nGate: {decision.explanation}")
     print("\nLower is better. 0.3 is a close match, 0.9 is unrelated.")
-    print("Milestone 4: run your five questions, then three questions your")
-    print("documents clearly don't cover, and look for the gap between the")
-    print("two groups. Your cutoff goes in that gap.")
+    print("Milestone 4: run your five questions, then the five in OUT_OF_SCOPE")
+    print("that your documents clearly don't cover, and look for the gap")
+    print("between the two groups. Your cutoff goes in that gap.")
 
 
 def ask_pipeline(
