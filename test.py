@@ -231,7 +231,10 @@ def check_embeddings():
         from chromadb.utils.embedding_functions import ONNXMiniLM_L6_V2
     except ImportError:
         return report("SKIP", "Embedding model", "chromadb not installed yet.")
-    print("         (first run downloads ~80 MB — this is the slow part)")
+    # Printed before the check runs, because on a first run this is where you
+    # sit and wait. Name the check it belongs to — with no label it reads as a
+    # detail line under whatever check printed last.
+    print("[ .. ] Embedding model — first run downloads ~80 MB, this is the slow part")
     try:
         model = ONNXMiniLM_L6_V2()
         dim = len(model(["ready"])[0])
