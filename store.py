@@ -73,7 +73,7 @@ def _sentence_transformer(name: str):
     """
     The escape hatch: any model that isn't the bundled one.
 
-    Week 2's "try a second embedding model" stretch option comes through here,
+    Unit 2's "try a second embedding model" stretch option comes through here,
     and so does anything you set `EMBEDDING_MODEL` to. This path *does* need
     `sentence-transformers` and a reachable Hugging Face, neither of which the
     default install has — which is the whole point of the default install.
@@ -143,7 +143,7 @@ def build_index(
     Embed every chunk and store it.
 
     `variant` lets you keep more than one index of the same corpus at the same
-    time. In week 2, when you compare two chunking strategies, index the second
+    time. In unit 2, when you compare two chunking strategies, index the second
     one as variant="v2" and you can query both instead of deleting the first
     and starting over.
     """

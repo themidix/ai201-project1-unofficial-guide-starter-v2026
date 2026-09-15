@@ -1,6 +1,6 @@
 # Acceptance criteria — The Unofficial Guide
 
-Five criteria that say what "working" means for this system, written in week 1
+Five criteria that say what "working" means for this system, written in unit 1
 **before** any results existed.
 
 An acceptance criterion names a target: a number, a count, a rate, or something
@@ -12,7 +12,7 @@ Under each one, write a sentence or two on **why that target** and not a
 stricter or looser one. A reason that says something about your corpus or your
 pipeline earns credit; *"80% seemed reasonable"* does not.
 
-> Missing your own targets next week costs you nothing. Setting a target so
+> Missing your own targets next unit costs you nothing. Setting a target so
 > easy you can't miss it does.
 
 ---
@@ -96,7 +96,7 @@ in at least 4 of 5 tries.
 ---
 
 <!-- ─────────────────────────────────────────────────────────────────────────
-     WEEK 2 — read this before you change anything above.
+     UNIT 2 — read this before you change anything above.
 
      If a criterion turns out to be BROKEN rather than merely unmet, you can
      revise it, and that earns credit. But never delete or edit the original
@@ -109,7 +109,7 @@ in at least 4 of 5 tries.
 
          **Why this target:** ...
 
-         > **Revised in week 2:** For at least 4 of 5 questions, the top three
+         > **Revised in unit 2:** For at least 4 of 5 questions, the top three
          > results contain the answer.
          >
          > **Why revised:** I couldn't judge "the chunks include one that

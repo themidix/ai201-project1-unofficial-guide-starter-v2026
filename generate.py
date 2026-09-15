@@ -22,8 +22,9 @@ What this function does for you:
   • Counts your calls, and the tokens they used, so what a run cost is a
     number you can see rather than one you estimate.
 
-⚠️ Caching is ON while you build and OFF during evaluation. Your test week
-needs three real answers to the same question, not one answer three times over.
+⚠️ Caching is ON while you build and OFF during evaluation. Your unit 2
+testing needs three real answers to the same question, not one answer three
+times over.
 `run_eval.py` passes cache=False for you.
 """
 

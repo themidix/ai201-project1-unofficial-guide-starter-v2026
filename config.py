@@ -53,7 +53,7 @@ THRESHOLD = 0.6
 # This is the model Chroma bundles, and leaving it alone is the fast path: it
 # downloads about 80 MB from Chroma's own CDN and needs nothing else installed.
 #
-# Setting it to any other name — week 2's "try a second embedding model"
+# Setting it to any other name — unit 2's "try a second embedding model"
 # stretch option — switches to loading that model from Hugging Face instead,
 # which needs `pip install 'sentence-transformers>=3.4,<3.5'` first. store.py
 # says so with a real error message rather than a stack trace if you forget.
@@ -90,7 +90,7 @@ def collection_name(name: str | None = None, variant: str = "default") -> str:
     Name of the vector-store collection for a corpus.
 
     `variant` lets you index the same corpus two different ways and query both
-    without deleting anything — you'll want that in week 2 when you compare
+    without deleting anything — you'll want that in unit 2 when you compare
     chunking strategies.
 
     Chroma is fussy about collection names: 3 to 63 characters, starting and

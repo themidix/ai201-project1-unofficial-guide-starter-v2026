@@ -6,7 +6,7 @@ Run your test questions repeatedly and write the results down.
     python run_eval.py --runs 5        more runs
     python run_eval.py --label after   name this run, e.g. before/after a fix
 
-This does the mechanical half of week 2 for you: it asks each of your questions
+This does the mechanical half of unit 2 for you: it asks each of your questions
 the same way three separate times, with caching turned off so you get three
 real answers, and writes everything into results/ as a table with one row per
 question.
@@ -22,7 +22,7 @@ up into your criteria is your work, not the script's.
 
 ⚠️ What it does NOT do is decide whether an answer was right.
 
-That judgment is yours, and you'll build it in class in week 2 as `scorer.py`.
+That judgment is yours, and you'll build it in class in unit 2 as `scorer.py`.
 Until that file exists, the Run columns carry the raw answers and you read them
 yourself. Once it exists — a file called `scorer.py`, with a function
 `judge(question, expects, answer, results) -> bool` — this script finds it
@@ -94,7 +94,7 @@ def main():
     judge = load_scorer()
     if judge is None:
         print("No scorer.py found — running unscored. Verdict column will be blank.")
-        print("You'll build scorer.py in class in week 2.\n")
+        print("You'll build scorer.py in class in unit 2.\n")
 
     if args.runs < 3:
         print(f"⚠️  {args.runs} run(s). The submission asks for three.\n")

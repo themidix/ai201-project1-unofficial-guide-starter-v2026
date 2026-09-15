@@ -19,7 +19,7 @@ python-dotenv>=1.0,<1.2
 # Same model, same 384 dimensions, same cosine distances — so THRESHOLD does
 # not move. See `store.py::_embedder`.
 #
-# Week 2's "try a second embedding model" option is the one thing that does
+# Unit 2's "try a second embedding model" option is the one thing that does
 # need the heavier route. It is an optional install, not a requirement:
 #     pip install 'sentence-transformers>=3.4,<3.5'
 chromadb>=0.6,<0.7
@@ -37,7 +37,7 @@ posthog>=3.0,<4.0
 # and it's free at the tier this course uses.
 google-genai>=1.0,<2.0
 
-# Keyword search, for one of week 2's improvement options. Shipped pinned so
+# Keyword search, for one of unit 2's improvement options. Shipped pinned so
 # it's there if you want it — the implementation is yours to write.
 rank-bm25>=0.2.2,<0.3
 
@@ -45,7 +45,7 @@ rank-bm25>=0.2.2,<0.3
 # instead of a command that exits. That's serve.py.
 flask>=3.0,<3.2
 
-# Week 9 only, and unused before then. The server Flask starts for you is a
+# Unit 9 only, and unused before then. The server Flask starts for you is a
 # development server and says so out loud; this is the one you actually deploy
-# behind. Installed now so week 9 is a command, not a dependency problem.
+# behind. Installed now so unit 9 is a command, not a dependency problem.
 gunicorn>=23.0,<24.0

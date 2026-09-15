@@ -127,7 +127,7 @@ def main():
     check("  gate refuses a distant one", far.passed is False)
     check("  gate refuses when nothing came back", gate.check([]).passed is False)
 
-    # Two index variants can coexist — week 2 compares chunkings.
+    # Two index variants can coexist — unit 2 compares chunkings.
     docs = load_documents("campus_life")
     build_index(fallback_split(docs, chunk_size=300, overlap=50),
                 corpus="campus_life", variant="v2")

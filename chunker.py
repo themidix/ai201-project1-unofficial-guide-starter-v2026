@@ -51,7 +51,7 @@ def fallback_split(
     The starter's original chunker. Fixed-size character windows with overlap.
 
     Keep this function. Milestone 3's stop rule points back at it, and having
-    something to compare your own strategy against is useful in week 2.
+    something to compare your own strategy against is useful in unit 2.
     """
     chunk_size = chunk_size or config.CHUNK_SIZE
     overlap = overlap or config.CHUNK_OVERLAP

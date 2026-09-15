@@ -17,7 +17,7 @@
 
 ---
 
-# Week 1
+# Unit 1
 
 ## What This Does
 
@@ -127,10 +127,10 @@
 
 ---
 
-# Week 2
+# Unit 2
 
 <!-- These sections get ADDED to what's already above. Don't delete or rewrite
-     week 1 — the point is that someone can see what you said before you knew
+     unit 1 — the point is that someone can see what you said before you knew
      how it went. -->
 
 ## Run Log — Before
@@ -160,7 +160,7 @@
 ## Verdicts
 
 <!-- MET or MISSED for each of the five, against the target you wrote last
-     week — not a new one. Plus a sentence on how you decided. That sentence
+     unit — not a new one. Plus a sentence on how you decided. That sentence
      matters most where it was close.
 
      If your target said 4 of 5 and your runs came out 4, 3, 4, that's a MISS.

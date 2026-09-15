@@ -329,7 +329,7 @@ def build_parser():
     parser.add_argument(
         "--variant",
         default="default",
-        help="index variant, for holding two chunkings at once (week 2)",
+        help="index variant, for holding two chunkings at once (unit 2)",
     )
 
     sub = parser.add_subparsers(dest="command", required=True)

@@ -21,9 +21,9 @@ and impossible to deploy. A hosted service has to stay up and wait for
 requests. This is the smallest thing that does that.
 
 ⚠️ There is deliberately no logging, no timing and no metrics in this file.
-Week 9 has you build the structured log yourself — the request line, the
+Unit 9 has you build the structured log yourself — the request line, the
 timing field everyone skips, the whole instrument-before-you-deploy exercise.
-Shipping a logger here would hand you the answer to that. Add yours in week 9;
+Shipping a logger here would hand you the answer to that. Add yours in unit 9;
 this file stays the bare shell until then.
 """
 
