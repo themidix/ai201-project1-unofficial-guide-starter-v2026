@@ -85,7 +85,7 @@ switching corpora.**
 | `python app.py ask` | Keeps asking until you press Enter on an empty line |
 | `python app.py chunks` | Prints sample chunks — **Milestone 3** |
 | `python app.py retrieve "question"` | Shows distances without spending a model call — **Milestone 4** |
-| `python run_eval.py --label before` | Runs every test question three times, puts every `OUT_OF_SCOPE` question through the gate, and writes a run log — **week 2** |
+| `python run_eval.py --label before` | Runs every test question three times, puts every `OUT_OF_SCOPE` question through the gate, and writes a run log — **unit 2** |
 
 Useful flags:
 
@@ -109,7 +109,7 @@ Useful flags:
 | 3 | Swap in your own chunker | Edit `chunker.py`, then `app.py index` and `app.py chunks` |
 | 4 | Tune retrieval, set your cutoff | `app.py retrieve "..."`, then edit `THRESHOLD` in `config.py` |
 | 5 | Write it up | Fill in `README.md` |
-| Week 2 | Run the test, fix one thing, re-run | `run_eval.py --label before` … `run_eval.py --label after` |
+| Unit 2 | Run the test, fix one thing, re-run | `run_eval.py --label before` … `run_eval.py --label after` |
 
 `app.py chunks` prints each chunk with its **source file and the function that
 produced it** — both of which your README has to name. Copy them straight
@@ -136,7 +136,7 @@ number — three passes would produce the same three answers.
 | `gate.py` | The relevance gate. Refuses questions nothing came back close enough for |
 | `generate.py` | Writes the answer — **stage 5**. The only thing that calls out to a service |
 | `app.py` | The command line |
-| `serve.py` | The same pipeline behind HTTP, for when it has to run as a service — **week 9** |
+| `serve.py` | The same pipeline behind HTTP, for when it has to run as a service — **unit 9** |
 | `run_eval.py` | Runs your questions repeatedly and writes the run log |
 | `questions.py` | Your five test questions, and the five out-of-corpus ones the gate should refuse. **You fill in the first five** |
 | `criteria.md` | Your five acceptance criteria. **You fill this in** |
@@ -144,7 +144,7 @@ number — three passes would produce the same three answers.
 | `corpora/` | The provided documents, and `corpora/README.md` describing each |
 | `results/` | Run logs, written by `run_eval.py`. **Commit these** — they're your evidence |
 
-The five stages matter more than they look. In week 2 you diagnose each failure
+The five stages matter more than they look. In unit 2 you diagnose each failure
 by naming which stage caused it, so it's worth knowing now which file is which.
 
 ---
@@ -192,10 +192,10 @@ own machine alone.
 
 ---
 
-## Running it somewhere else — **week 9**
+## Running it somewhere else — **unit 9**
 
-Week 1 doesn't need this. It's here because the file it describes ships in the
-starter, and finding out in week 9 that it exists is worse than reading one
+Unit 1 doesn't need this. It's here because the file it describes ships in the
+starter, and finding out in unit 9 that it exists is worse than reading one
 table now.
 
 `serve.py` puts the same pipeline behind HTTP, so it can run as a service that
@@ -218,7 +218,7 @@ gunicorn serve:app                 # the way a host starts it
 > up. That's the tier, not your code.
 
 `serve.py` has **no logging and no timing in it on purpose** — building that is
-the week 9 exercise, and it is easier to instrument something you wrote.
+the unit 9 exercise, and it is easier to instrument something you wrote.
 
 ---
 
@@ -239,19 +239,19 @@ start** — a feature the README never claims earns nothing.
   threshold to move too — a different model means different distances, and
   the 0.6 you measured in Milestone 4 was measured against this one.
 
-`rank-bm25` is already installed for week 2's hybrid-search option. The
+`rank-bm25` is already installed for unit 2's hybrid-search option. The
 dependency ships; the implementation is yours.
 
 ---
 
 ## A note on committing
 
-Commit as you go — at least four commits in week 1, at least four more in week
-2. Your commit history is what shows your criteria existed before your results
-did. If a grade is ever disputed, that history is what settles it.
+Commit as you go — at least four new commits in unit 1, at least four more in
+unit 2. Your commit history is what shows your criteria existed before your
+results did.
 
 **Do not delete and recreate this repository.** You submit the same URL both
-weeks.
+units.
 
 `results/` is deliberately **not** in `.gitignore`. Your run logs are evidence
 that the test actually happened, and they're part of what gets graded.

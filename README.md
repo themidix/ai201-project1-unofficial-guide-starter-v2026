@@ -9,8 +9,7 @@
 > Leave that file alone.
 >
 > **Paste everything as text.** No screenshots, no video. A typed table gets
-> full credit; a picture of the same table gets none, because the grader can't
-> read it.
+> full credit; a picture of the same table gets none.
 >
 > Delete these instruction blocks as you replace them. The `<!-- -->` comments
 > are notes to you and don't show up when the page renders — you can leave them
