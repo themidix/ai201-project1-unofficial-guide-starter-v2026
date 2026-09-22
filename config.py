@@ -43,6 +43,10 @@ TOP_K = 5               # how many chunks to pull back per question
 # 0.6 is a reasonable starting point, not a right answer. Milestone 4 has you
 # measure your own two groups of distances and put the cutoff in the gap.
 # Most corpora land somewhere between 0.45 and 0.75.
+#
+# Re-measured after the Milestone 3 chunker change (city_guides, heading-aware
+# chunks): in-scope best distances 0.264-0.487, out-of-scope 0.803-0.975.
+# 0.6 still sits in the gap, so it was left unchanged. See README.md.
 THRESHOLD = 0.6
 
 
