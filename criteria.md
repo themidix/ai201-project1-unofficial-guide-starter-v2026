@@ -23,8 +23,9 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+The city guides are structured by town and topic, so four of five questions
+should retrieve a chunk from the relevant guide even before I improve the
+chunking strategy.
 
 ---
 
@@ -33,8 +34,9 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+The answer generator is given the retrieved source names and the corpus is
+small and internally consistent, so every answer should be able to cite at
+least one guide without guessing.
 
 ---
 
@@ -50,28 +52,24 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+The starter measurements show in-scope best distances from 0.305 to 0.485 and
+out-of-scope distances from 0.829 to 0.903, so a 0.6 cutoff leaves a useful
+gap between the two groups.
 
 ---
 
 ## 4. Something about your chunks
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
+At least 4 of 5 sampled chunks should end at a sentence boundary and keep the
+heading with the section it introduces.
 
 
 
 **Why this target:**
+The city guides are organized under headings, but the starter's fixed-size
+chunks cut through words and sentences, including the accessibility chunk that
+ends in the middle of a sentence. A structural chunker should make most sample
+chunks readable on their own.
 
 
 
@@ -79,17 +77,15 @@ in at least 4 of 5 tries.
 
 ## 5. Your choice
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
+At least 4 of 5 in-scope answers should cite the guide that contains the
+supporting fact, not merely cite an unrelated retrieved document.
 
 
 
 **Why this target:**
+The usefulness of a travel guide depends on sending a visitor to the right
+town or regional guide, so correct source attribution matters in addition to
+getting a plausible answer.
 
 
 

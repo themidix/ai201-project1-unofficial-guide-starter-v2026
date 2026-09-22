@@ -1,4 +1,4 @@
-# The Unofficial Guide
+# The Unofficial Guide - City Guides
 
 <!-- Replace this line with your name and which corpus you picked. -->
 
@@ -21,26 +21,25 @@
 
 ## What This Does
 
-<!-- Three or four sentences. Which corpus you picked, and the kinds of
-     questions your system answers. Write it for someone who has never seen
-     this repo.
-
-     Milestone 5. -->
+I chose the city_guides corpus, which contains fourteen structured travel
+guides about towns and the surrounding region. The system answers practical
+questions about transportation, accessibility, food, seasons, walking, and
+what to see. The documents are organized by headings such as Getting there,
+Getting around, and When to go, so the retrieval results can be connected to a
+specific town or regional topic.
 
 ## Chunking Strategy
 
-**Chunk size:**
-**Overlap:**
+**Chunk size:** 800 characters
+**Overlap:** 120 characters
 
-<!-- What about YOUR documents made you pick these numbers? Short posts and
-     long sectioned guides don't want the same chunking, and "800 seemed
-     reasonable" earns nothing. Point at something you noticed when you read
-     the documents in Milestone 1.
-
-     If you changed your mind partway through, say so and say why. That's worth
-     more than pretending you got it right first time.
-
-     Milestone 3. -->
+The starter uses 800-character chunks with 120 characters of overlap. The
+city-guide documents are much longer than the other corpora, averaging about
+2,068 characters, and their useful information is spread across labelled
+sections. I chose these starter values for the baseline, but the sample output
+shows that fixed character boundaries cut through headings, words, and
+sentences. That is the problem I would address in Milestone 3 with a
+heading-aware chunker.
 
 ## Sample Chunks
 
@@ -53,29 +52,76 @@
 
      Milestone 3. -->
 
-**Chunk 1** — source: `` — produced by: ``
+**Chunk 1** - source: `guide_accessibility.md#0` - produced by: `chunker.py::fallback_split`
 
 ```
+# Getting around the region with limited mobility
+
+An honest assessment rather than a promotional one. Some of these places are
+difficult and it is better to know in advance.
+
+## Straightforward
+
+**Thornby Wells** is the easiest town in the region. It is flat, compact, and
+everything is within three minutes of everything else. Parking is free for two
+hours anywhere in town and the station is central. The pump room and gardens
+are level throughout.
+
+**Marchwood** has a modern tram network with level boarding on all four lines,
+running every 8 minutes on weekdays. The city museum and covered market are
+both step-free. The distances between districts are the main consideration.
 ```
 
-**Chunk 2** — source: `` — produced by: ``
+**Chunk 2** - source: `guide_corry_vale.md#2` - produced by: `chunker.py::fallback_split`
 
 ```
+## When to go
+
+May to September. Outside those months the pub in the third village closes,
+the farm shop reduces its hours, and several footpaths become genuinely boggy
+rather than merely wet. The road is not gritted above the second village and
+is impassable in snow.
+
+## Practical notes
+
+Cash is still useful at the market and in smaller places, though cards are
+accepted almost everywhere now. Mobile coverage is good in the centre and
+patchy on the outskirts.
 ```
 
-**Chunk 3** — source: `` — produced by: ``
+**Chunk 3** - source: `guide_givens_mill.md#0` - produced by: `chunker.py::fallback_split`
 
 ```
+# Givens Mill
+
+Givens Mill is a village of 700 built around a working watermill that still
+grinds flour commercially. It is the sort of place people visit for an
+afternoon and then talk about for longer than the visit lasted.
+
+## Getting there
+
+No station and no bus on Sundays; four buses a day from Brightwater on
+weekdays, taking 30 minutes. Driving is 20 minutes.
 ```
 
-**Chunk 4** — source: `` — produced by: ``
+**Chunk 4** - source: `guide_kestrelford.md#3` - produced by: `chunker.py::fallback_split`
 
 ```
+The nearest full hospital is in Brightwater; there is a minor injuries unit
+locally with limited hours.
 ```
 
-**Chunk 5** — source: `` — produced by: ``
+**Chunk 5** - source: `guide_regional_transport.md#1` - produced by: `chunker.py::fallback_split`
 
 ```
+The Kestrelford service is hourly on weekdays, two-hourly on Saturdays, and
+does not run on Sundays. The Halden Bay coast service runs four times daily
+year-round.
+
+## Driving
+
+Roads are good between the towns and poor on the approaches to both Kestrelford
+and Halden Bay. Parking is the constraint rather than driving.
 ```
 
 ## Sample Answer
@@ -83,14 +129,14 @@
 <!-- One complete question and answer, pasted as text, with the source line
      visible. Milestone 4. -->
 
-**Question:**
-
-**Answer:**
+**Question:** How often do Marchwood trams run on weekdays?
 
 ```
+Marchwood's four-line tram network runs every 8 minutes on weekdays.
+Source: `guide_marchwood.md`.
 ```
 
-**My relevance cutoff:**
+**My relevance cutoff:** 0.6
 
 <!-- The number you set in config.py, and how you got there.
 
@@ -102,8 +148,17 @@
      Milestone 4. -->
 
 | Question | In corpus? | Best distance |
-|---|---|---|
-|  |  |  |
+|---|---|---:|
+| How often do Marchwood trams run on weekdays? | Yes | 0.364 |
+| When are the gardens at Thornby Wells best? | Yes | 0.386 |
+| Which town is easiest for visitors with limited mobility? | Yes | 0.485 |
+| How many weekday buses run from Brightwater to Givens Mill? | Yes | 0.331 |
+| How long does the railway take from Brightwater to the regional hub? | Yes | 0.305 |
+| What is the capital of Mongolia? | No | 0.887 |
+| How do I change the oil in a diesel engine? | No | 0.897 |
+| Who won the 1994 World Cup? | No | 0.903 |
+| What is the recommended dosage of ibuprofen for a headache? | No | 0.829 |
+| How do I write a for loop in Rust? | No | 0.853 |
 
 ## How I Used AI
 
@@ -116,9 +171,15 @@
 
      Milestone 5. -->
 
-**1.**
+**1.** I used AI to help interpret the starter's output and identify that the
+city guides were structurally different from the short-post corpora. I kept
+the observation that the documents are heading-based, but chose the corpus and
+the questions myself.
 
-**2.**
+**2.** I used AI to diagnose the macOS CoreML failure from the ONNX runtime and
+confirm that Chroma supports an explicit CPU provider. I changed `store.py` to
+use `CPUExecutionProvider`, then verified that all 51 chunks indexed and that
+an end-to-end question succeeded.
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
